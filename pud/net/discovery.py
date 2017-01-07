@@ -2,10 +2,13 @@ import zerorpc
 import gevent
 import time
 import typing
+import logbook
 
 
 class DiscoveryService:
     timeout = 15
+
+    _log = logbook.Logger("Discovery")
 
     def __init__(self):
         self._discovered = {}
@@ -17,6 +20,7 @@ class DiscoveryService:
         def reg():
             while True:
                 for ep in self._endpoints:
+                    self._log.debug("Advertize {} as {}".format(ep, repr(self._tags)))
                     self._pub.register(ep, self._tags)
                 gevent.sleep(self.timeout)
 
@@ -46,6 +50,7 @@ class DiscoveryService:
         else:
             tags = set((tags,))
         self._discovered[ep] = (tags, time.time())
+        self._log.debug("Received {} as {}".format(ep, repr(self._tags)))
 
     def query(self, tag=None):
         def gen():

@@ -54,6 +54,7 @@ class EnumerableType(type):
     def instances(cls):
         return cls.query_instances()
 
+
 class Enumerable(metaclass=EnumerableType):
     _base_ = True
 

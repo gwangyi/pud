@@ -62,23 +62,21 @@ def main():
 
     parser = optparse.OptionParser()
     parser.add_option("-s", "--xsub", dest="xsub", help="Master's subscriber endpoint", action="append")
-    parser.add_option("-p", "--xpub", dest="xpub", help="Master's publisher endpoint", action="append")
 
     options, args = parser.parse_args()
-    if options.xsub is None or options.xpub is None or len(args) == 0:
+    if options.xsub is None or len(args) == 0:
         parser.print_help()
         exit(2)
 
     d = discovery.DiscoveryService()
     d.add_subs(*options.xsub)
-    d.add_pubs(*options.xpub)
     disc_job = gevent.spawn(d.run)
 
     s = zerorpc.Server(WorkerService())
     for ep in args:
         s.bind(ep)
-    d.add_endpoints(*args)
     d.add_tags("pud-worker")
+    d.add_endpoints(*args)
     gevent.joinall([
         disc_job,
         gevent.spawn(s.run)
