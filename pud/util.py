@@ -1,3 +1,7 @@
+import ctypes
+import typing
+
+
 class ContextType(type):
     def __init__(cls, what, bases, members):
         base = members.get('_base_', False)
@@ -69,4 +73,48 @@ class ContextObject(metaclass=ContextType):
         if self is not type(self).current:
             raise ValueError("Invalid context state")
         self._context_stack.pop()
+
+
+class Buffer:
+    def __init__(self, size_or_bytes: typing.Union[int, bytes]):
+        if isinstance(size_or_bytes, int):
+            self._buffer = ctypes.create_string_buffer(size_or_bytes)
+            self._as_parameter_ = self._buffer
+        else:
+            self._buffer = ctypes.create_string_buffer(len(size_or_bytes))
+            self._as_parameter_ = self._buffer
+            ctypes.memmove(self._buffer, size_or_bytes, len(Size_or_bytes))
+
+    def resize(self, size):
+        if ctypes.sizeof(self._buffer) < size:
+            ctypes.resize(self._buffer, size)
+        self._as_parameter_ = (ctypes.c_char * size).from_buffer(self._buffer)
+
+    @property
+    def raw(self):
+        return self._as_parameter_.raw
+
+    @raw.setter
+    def raw(self, val):
+        self._as_parameter_.raw = val
+
+    @property
+    def value(self):
+        return self._as_parameter_.value
+
+    @value.setter
+    def value(self, val):
+        self._as_parameter_.value = val
+
+    def __len__(self):
+        return len(self._as_parameter_)
+
+    def __getitem__(self, item):
+        return self._as_parameter_[item]
+
+    def __setitem__(self, item, val):
+        self._as_parameter_[item] = val
+
+    def __bytes__(self):
+        return bytes(self._as_parameter_)
 
