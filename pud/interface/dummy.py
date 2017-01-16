@@ -1,14 +1,15 @@
 from . import Device, Command
 import random
 
+
 class DummyDevice(Device):
-    command_fields = [ 'result' ]
+    command_fields = ['result']
 
     def __init__(self, path):
         super().__init__(path,
-                b'DUMMY', b'1.00', b'DUMMYDISK',
-                "{:010x}".format(id(self)).encode('ascii'),
-                2048576, 512)
+                         b'DUMMY', b'1.00', b'DUMMYDISK',  # vendor, revision, model
+                         "{:010x}".format(id(self)).encode('ascii'),  # serial
+                         2048576, 512)  # capacity, sector_size
 
     def _open(self):
         print("open {}".format(self.path))

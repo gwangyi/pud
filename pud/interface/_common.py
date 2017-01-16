@@ -10,7 +10,7 @@ def _sanitize(v: bytes) -> str:
     return bytes(ch if 32 <= ch < 127 else 46 for ch in v).decode('ascii')
 
 
-def _human(n: int) -> str:
+def _human(n: int) -> typing.Optional[str]:
     if n is None:
         return None
     postfixes = "kMGTPE"
@@ -38,8 +38,8 @@ class Device(Enumerable, ContextObject, metaclass=DeviceType):
     command_fields = []
 
     def __init__(self, path: str,
-            vendor: bytes, model: bytes, revision: bytes,
-            serial: bytes, capacity: int, sector_size: int):
+                 vendor: bytes, model: bytes, revision: bytes,
+                 serial: bytes, capacity: int, sector_size: int):
         self.path = path
         self.raw_vendor = vendor
         self.raw_model = model
@@ -61,7 +61,7 @@ class Device(Enumerable, ContextObject, metaclass=DeviceType):
         self.close()
 
     def __repr__(self):
-        fmt = "<{}: {path} vendor={vendor} revision={revision}, mode={model}, serial={serial}, " \
+        fmt = "<{}: {path} vendor={vendor} revision={revision}, model={model}, serial={serial}, " \
                 "capacity={capacity}, sector_size={sector_size}>"
         if hasattr(self, '__qualname__'):
             name = type(self).__qualname__
@@ -69,13 +69,13 @@ class Device(Enumerable, ContextObject, metaclass=DeviceType):
             name = type(self).__name__
 
         return fmt.format(name,
-                path=self.path,
-                vendor=self.vendor,
-                revision=self.revision,
-                model=self.model,
-                serial=self.serial,
-                capacity=_human(self.capacity * self.sector_size),
-                sector_size=self.sector_size)
+                          path=self.path,
+                          vendor=self.vendor,
+                          revision=self.revision,
+                          model=self.model,
+                          serial=self.serial,
+                          capacity=_human(self.capacity * self.sector_size),
+                          sector_size=self.sector_size)
 
     def open(self):
         if self._open_depth > 0:
@@ -120,7 +120,7 @@ class Device(Enumerable, ContextObject, metaclass=DeviceType):
 class Command:
     def send(self, target: typing.Optional[Device]=None):
         if target is None:
-            target = Device.current
+            target = Device.current()
             if target is None:
                 raise RuntimeError("Device context is not specified")
 
@@ -129,10 +129,10 @@ class Command:
 
 def command(target: typing.Optional[Device]=None, **kwargs) -> Command:
     if target is None:
-        target = Device.current
+        target = Device.current()
         if target is None:
             raise RuntimeError("Device context is not specified")
-    return Device.current.create_command(**kwargs)
+    return Device.current().create_command(**kwargs)
 
 
 def load_protocol(*protocols):
@@ -140,11 +140,10 @@ def load_protocol(*protocols):
         importlib.import_module('..' + protocol, __name__)
 
 
-def available_protocols():
+def __available_protocols():
     interface = importlib.import_module('..', __name__)
     for _, mod, _ in pkgutil.walk_packages(interface.__path__):
         if mod[0:1] != '_':
             yield mod
 
-available_protocols = list(available_protocols())  # type: typing.List[str]
-
+available_protocols = list(__available_protocols())  # type: typing.List[str]

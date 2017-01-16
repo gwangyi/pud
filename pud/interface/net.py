@@ -16,8 +16,8 @@ class NetDevice(Device):
         self.command_fields = info['command_fields']
         
         super().__init__(path,
-                info['vendor'], info['model'], info['revision'],
-                info['serial'], info['capacity'], info['sector_size'])
+                         info['vendor'], info['model'], info['revision'],
+                         info['serial'], info['capacity'], info['sector_size'])
 
     def _open(self):
         self._client('open', self._remote_path)
@@ -54,4 +54,3 @@ def net_devices():
         url = urllib.parse.urlparse(ep)
         for dev, protocol in c.devices():
             yield NetDevice(urllib.parse.urlunparse(url[0:2] + (dev, '', '', '')))
-

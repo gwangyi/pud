@@ -12,7 +12,8 @@ class WorkerService:
     def __init__(self):
         self._devices = {}
 
-    def available_protocols(self):
+    @staticmethod
+    def available_protocols():
         return available_protocols
 
     def load_protocol(self, *protocols):
@@ -27,7 +28,7 @@ class WorkerService:
         return list(gen())
 
     def scan_devices(self):
-        for dev in Device.instances:
+        for dev in Device.instances():
             self._devices[dev.path] = dev
         return self.devices()
 
@@ -40,15 +41,15 @@ class WorkerService:
     def info(self, path):
         dev = self._devices[path]
         return dict(
-                path=dev.path,
-                vendor=dev.raw_vendor,
-                model=dev.raw_model,
-                revision=dev.raw_revision,
-                serial=dev.raw_serial,
-                capacity=dev.capacity,
-                sector_size=dev.sector_size,
-                command_fields=list(f for f in dev.command_fields if f[0] != '_'),
-                )
+            path=dev.path,
+            vendor=dev.raw_vendor,
+            model=dev.raw_model,
+            revision=dev.raw_revision,
+            serial=dev.raw_serial,
+            capacity=dev.capacity,
+            sector_size=dev.sector_size,
+            command_fields=list(f for f in dev.command_fields if f[0] != '_'),
+        )
 
     def send(self, path, cmd):
         dev = self._devices[path]

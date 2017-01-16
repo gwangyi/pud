@@ -20,7 +20,7 @@ class DiscoveryService:
         def reg():
             while True:
                 for ep in self._endpoints:
-                    self._log.debug("Advertize {} as {}".format(ep, repr(self._tags)))
+                    self._log.debug("Advertise {} as {}".format(ep, repr(self._tags)))
                     self._pub.register(ep, self._tags)
                 gevent.sleep(self.timeout)
 
@@ -48,7 +48,7 @@ class DiscoveryService:
         if isinstance(tags, (list, tuple)):
             tags = set(tags)
         else:
-            tags = set((tags,))
+            tags = {tags}
         self._discovered[ep] = (tags, time.time())
         self._log.debug("Received {} as {}".format(ep, repr(self._tags)))
 
@@ -75,4 +75,3 @@ class DiscoveryRPC:
 
     def register(self, ep, tags):
         self._service.register(ep, tags)
-

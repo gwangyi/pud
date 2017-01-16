@@ -91,3 +91,6 @@ ENV/
 
 # vim
 *.sw?
+
+# JetBrain IDE
+.idea/
