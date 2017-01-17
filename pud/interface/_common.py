@@ -7,7 +7,7 @@ from ..util import ContextType, EnumerableType, ContextObject, Enumerable
 
 
 def _sanitize(v: bytes) -> str:
-    return bytes(ch if 32 <= ch < 127 else 46 for ch in v).decode('ascii')
+    return bytes(ch if 32 <= ch < 127 else 46 for ch in v).decode('ascii').strip("\t\r\n\0 ")
 
 
 def _human(n: int) -> typing.Optional[str]:
@@ -63,7 +63,7 @@ class Device(Enumerable, ContextObject, metaclass=DeviceType):
     def __repr__(self):
         fmt = "<{}: {path} vendor={vendor} revision={revision}, model={model}, serial={serial}, " \
                 "capacity={capacity}, sector_size={sector_size}>"
-        if hasattr(self, '__qualname__'):
+        if hasattr(type(self), '__qualname__'):
             name = type(self).__qualname__
         else:
             name = type(self).__name__

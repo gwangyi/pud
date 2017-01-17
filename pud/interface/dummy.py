@@ -35,4 +35,3 @@ def dummy_devices():
     for dev in range(random.randint(1, 10)):
         dev_path = "/dev/dummy/" + bytes((dev + 97,)).decode('ascii')
         yield DummyDevice(dev_path)
-
